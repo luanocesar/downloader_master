@@ -1,0 +1,30 @@
+{
+    "robots": [
+        {
+            "enabled": true,
+            "name": "Robot_1",
+            "ip": "192.168.1.10",
+            "clp_address": "%MW100"
+        },
+        {
+            "enabled": true,
+            "name": "Robot_2",
+            "ip": "192.168.10.2",
+            "clp_address": "CM02"
+        }
+    ],
+    "coordinates": [
+        {
+            "robot_name": "Robot_1",
+            "x": "1127",
+            "y": "345",
+            "enabled": true
+        },
+        {
+            "robot_name": "Robot_2",
+            "x": "1546",
+            "y": "360",
+            "enabled": true
+        }
+    ]
+}

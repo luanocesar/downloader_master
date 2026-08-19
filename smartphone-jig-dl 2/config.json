@@ -1,0 +1,189 @@
+{
+    "SERVER_HOST_IP": "127.0.0.1",
+    "SERVER_PORT": 8000,
+    "TARGET_WINDOW_TITLE": "PCB Tester Mockup v2.0",
+    "MAIN_PROCESS_FILE": "main.exe",
+    "LOG_FILE_PATH": "C:/DGS/log.txt",
+    "LOG_EXTRACT": {
+        "start": {
+            "name": "extract1",
+            "row_marker": "BARCODE:",
+            "from_word": "BARCODE:",
+            "pos_from": 0,
+            "pos_to": 0
+        },
+        "end": {
+            "name": "extract2",
+            "row_marker": "OVERALL RESULT:",
+            "from_word": "OVERALL RESULT:",
+            "pos_from": 0,
+            "pos_to": 0
+        }
+    },
+    "SLOTS": {
+        "1": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 229,
+                    "y": 88
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "2": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 213,
+                    "y": 86
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "3": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "4": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 1168,
+                    "y": 87
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                }
+            ]
+        },
+        "5": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "none"
+                },
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "6": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "7": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "none"
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                }
+            ]
+        },
+        "8": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 1204,
+                    "y": 435
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        }
+    }
+}

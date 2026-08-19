@@ -1,0 +1,6 @@
+pyautogui
+pydantic
+uvicorn
+fastapi
+pywinauto
+pyinstaller

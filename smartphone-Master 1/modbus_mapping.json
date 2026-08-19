@@ -1,0 +1,187 @@
+{
+  "settings": {
+    "PLC_IP": "192.168.100.100"
+  },
+  "coils": {
+    "meta": {
+      "start_address": 100,
+      "size": 60
+    },
+    "data": {
+      "DL_1_8_PRONTO": 100,
+      "DL_9_16_PRONTO": 101,
+      "BT_1_PRONTO": 144,
+      "BT_2_PRONTO": 145,
+      "BT_3_PRONTO": 146,
+      "BT_4_PRONTO": 147,
+      "BT_5_PRONTO": 148,
+      "BT_6_PRONTO": 149,
+      "BT_7_PRONTO": 150,
+      "BT_8_PRONTO": 151,
+      "FT_1_PRONTO": 152,
+      "FT_2_PRONTO": 153,
+      "FT_3_PRONTO": 154,
+      "FT_4_PRONTO": 155,
+      "FT_5_PRONTO": 156,
+      "FT_6_PRONTO": 157,
+      "FT_7_PRONTO": 158,
+      "FT_8_PRONTO": 159
+    }
+  },
+  "registers": {
+    "CODE_DL_1": {
+      "start_address": 100,
+      "size": 10
+    },
+    "CODE_DL_2": {
+      "start_address": 110,
+      "size": 10
+    },
+    "CODE_DL_3": {
+      "start_address": 120,
+      "size": 10
+    },
+    "CODE_DL_4": {
+      "start_address": 130,
+      "size": 10
+    },
+    "CODE_DL_5": {
+      "start_address": 140,
+      "size": 10
+    },
+    "CODE_DL_6": {
+      "start_address": 150,
+      "size": 10
+    },
+    "CODE_DL_7": {
+      "start_address": 160,
+      "size": 10
+    },
+    "CODE_DL_8": {
+      "start_address": 170,
+      "size": 10
+    },
+    "CODE_DL_9": {
+      "start_address": 180,
+      "size": 10
+    },
+    "CODE_DL_10": {
+      "start_address": 190,
+      "size": 10
+    },
+    "CODE_DL_11": {
+      "start_address": 200,
+      "size": 10
+    },
+    "CODE_DL_12": {
+      "start_address": 210,
+      "size": 10
+    },
+    "CODE_DL_13": {
+      "start_address": 220,
+      "size": 10
+    },
+    "CODE_DL_14": {
+      "start_address": 230,
+      "size": 10
+    },
+    "CODE_DL_15": {
+      "start_address": 240,
+      "size": 10
+    },
+    "CODE_DL_16": {
+      "start_address": 250,
+      "size": 10
+    },
+    "CODE_BT_1": {
+      "start_address": 260,
+      "size": 10
+    },
+    "CODE_BT_2": {
+      "start_address": 270,
+      "size": 10
+    },
+    "CODE_BT_3": {
+      "start_address": 280,
+      "size": 10
+    },
+    "CODE_BT_4": {
+      "start_address": 290,
+      "size": 10
+    },
+    "CODE_BT_5": {
+      "start_address": 300,
+      "size": 10
+    },
+    "CODE_BT_6": {
+      "start_address": 310,
+      "size": 10
+    },
+    "CODE_BT_7": {
+      "start_address": 320,
+      "size": 10
+    },
+    "CODE_BT_8": {
+      "start_address": 330,
+      "size": 10
+    },
+    "CODE_FT_1": {
+      "start_address": 340,
+      "size": 10
+    },
+    "CODE_FT_2": {
+      "start_address": 350,
+      "size": 10
+    },
+    "CODE_FT_3": {
+      "start_address": 360,
+      "size": 10
+    },
+    "CODE_FT_4": {
+      "start_address": 370,
+      "size": 10
+    },
+    "CODE_FT_5": {
+      "start_address": 380,
+      "size": 10
+    },
+    "CODE_FT_6": {
+      "start_address": 390,
+      "size": 10
+    },
+    "CODE_FT_7": {
+      "start_address": 400,
+      "size": 10
+    },
+    "CODE_FT_8": {
+      "start_address": 410,
+      "size": 10
+    }
+  },
+  "ips": {
+    "FT": {
+      "FT_1": "http://192.168.100.180:8000",
+      "FT_2": "http://192.168.100.185:8000",
+      "FT_3": "http://192.168.100.190:8000",
+      "FT_4": "http://192.168.100.195:8000",
+      "FT_6": "http://192.168.100.205:8000",
+      "FT_5": "http://192.168.100.200:8000",
+      "FT_7": "http://192.168.100.210:8000",
+      "FT_8": "http://192.168.100.215:8000"
+    },
+    "BT": {
+      "BT_1": "http://192.168.100.140:8000",
+      "BT_2": "http://192.168.100.145:8000",
+      "BT_3": "http://192.168.100.150:8000",
+      "BT_4": "http://192.168.100.155:8000",
+      "BT_5": "http://192.168.100.160:8000",
+      "BT_6": "http://192.168.100.165:8000",
+      "BT_7": "http://192.168.100.170:8000",
+      "BT_8": "http://192.168.100.175:8000"
+    },
+    "DL": {
+      "DL_1_8": "http://192.168.100.5:8000",
+      "DL_9_16": "http://192.168.100.10:8000"
+    }
+  }
+}

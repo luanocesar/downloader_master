@@ -1,0 +1,6 @@
+pymodbus~=2.5.3
+pyautogui~=0.9.54
+python-dotenv
+pydantic~=2.12.1
+fastapi~=0.104.1
+uvicorn~=0.24.0

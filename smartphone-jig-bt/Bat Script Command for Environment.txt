@@ -1,0 +1,2 @@
+Bat Script Command for Environment (Python)
+.\.venv\Scripts\activate.bat
