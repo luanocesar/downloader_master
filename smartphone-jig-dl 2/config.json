@@ -1,24 +1,56 @@
 {
     "SERVER_HOST_IP": "127.0.0.1",
     "SERVER_PORT": 8000,
-    "TARGET_WINDOW_TITLE": "PCB Tester Mockup v2.0",
+    "TARGET_WINDOW_TITLE": "GUI RPA Integrator - Form1.cs [Design] - Microsoft Visual Studio",
     "MAIN_PROCESS_FILE": "main.exe",
-    "LOG_FILE_PATH": "C:/DGS/log.txt",
+    "LOG_FILE_PATH": "C:/Users/4376066/Downloads/GetReelInfoforWMES 1.txt",
     "LOG_EXTRACT": {
-        "start": {
-            "name": "extract1",
-            "row_marker": "BARCODE:",
-            "from_word": "BARCODE:",
-            "pos_from": 0,
-            "pos_to": 0
+        "range": {
+            "start_marker": "{\"ReelID\":\"",
+            "end_marker": "\u5165\u5e93\u626b\u7801\u83b7\u53d6ReelID\u4fe1\u606f\u4eceWMS\u63a5\u6536\u4fe1\u606f"
         },
-        "end": {
-            "name": "extract2",
-            "row_marker": "OVERALL RESULT:",
-            "from_word": "OVERALL RESULT:",
-            "pos_from": 0,
-            "pos_to": 0
-        }
+        "fields": [
+            {
+                "name": "reelid",
+                "row_marker": "{\"ReelID\":\"",
+                "from_word": "ReelID\":\"",
+                "pos_from": 0,
+                "pos_to": 18,
+                "end_word": ""
+            },
+            {
+                "name": "result",
+                "row_marker": "\u5165\u5e93\u626b\u7801\u83b7\u53d6ReelID\u4fe1\u606f\u4eceWMS\u63a5\u6536\u4fe1\u606f",
+                "from_word": "\"PartNumber\":\"",
+                "pos_from": 0,
+                "pos_to": 13,
+                "end_word": ""
+            },
+            {
+                "name": "quantity",
+                "row_marker": "\"Quantity\":",
+                "from_word": "\"Quantity\":",
+                "pos_from": 0,
+                "pos_to": 0,
+                "end_word": ",\"LastUpdated\":"
+            },
+            {
+                "name": "status",
+                "row_marker": "\"Message\":\"",
+                "from_word": "\"Message\":\"",
+                "pos_from": 0,
+                "pos_to": 0,
+                "end_word": "\",\""
+            },
+            {
+                "name": "url",
+                "row_marker": "\u5165\u5e93\u626b\u7801\u83b7\u53d6ReelID\u4fe1\u606f\u7ed9WMS\u53d1\u9001\u4fe1\u606f\u3010",
+                "from_word": "\u5165\u5e93\u626b\u7801\u83b7\u53d6ReelID\u4fe1\u606f\u7ed9WMS\u53d1\u9001\u4fe1\u606f\u3010",
+                "pos_from": 0,
+                "pos_to": 0,
+                "end_word": "\u3011,\u5730\u5740"
+            }
+        ]
     },
     "SLOTS": {
         "1": {
@@ -29,149 +61,6 @@
                     "type": "click",
                     "x": 229,
                     "y": 88
-                },
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                },
-                {
-                    "enabled": true,
-                    "type": "key_press",
-                    "key": "enter"
-                }
-            ]
-        },
-        "2": {
-            "enabled": true,
-            "actions": [
-                {
-                    "enabled": true,
-                    "type": "click",
-                    "x": 213,
-                    "y": 86
-                },
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                },
-                {
-                    "enabled": true,
-                    "type": "key_press",
-                    "key": "enter"
-                }
-            ]
-        },
-        "3": {
-            "enabled": true,
-            "actions": [
-                {
-                    "enabled": true,
-                    "type": "click",
-                    "x": 0,
-                    "y": 0
-                },
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                },
-                {
-                    "enabled": true,
-                    "type": "key_press",
-                    "key": "enter"
-                }
-            ]
-        },
-        "4": {
-            "enabled": true,
-            "actions": [
-                {
-                    "enabled": true,
-                    "type": "click",
-                    "x": 1168,
-                    "y": 87
-                },
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                },
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                }
-            ]
-        },
-        "5": {
-            "enabled": true,
-            "actions": [
-                {
-                    "enabled": true,
-                    "type": "none"
-                },
-                {
-                    "enabled": true,
-                    "type": "click",
-                    "x": 0,
-                    "y": 0
-                },
-                {
-                    "enabled": true,
-                    "type": "key_press",
-                    "key": "enter"
-                }
-            ]
-        },
-        "6": {
-            "enabled": true,
-            "actions": [
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                },
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                },
-                {
-                    "enabled": true,
-                    "type": "key_press",
-                    "key": "enter"
-                }
-            ]
-        },
-        "7": {
-            "enabled": true,
-            "actions": [
-                {
-                    "enabled": true,
-                    "type": "none"
-                },
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                },
-                {
-                    "enabled": true,
-                    "type": "type_text",
-                    "source": "barcode"
-                }
-            ]
-        },
-        "8": {
-            "enabled": true,
-            "actions": [
-                {
-                    "enabled": true,
-                    "type": "click",
-                    "x": 1204,
-                    "y": 435
                 },
                 {
                     "enabled": true,

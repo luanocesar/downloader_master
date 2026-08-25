@@ -395,11 +395,18 @@ class SetupApp(tk.Tk):
         for entry in self.settings_entries.values():
             if isinstance(entry, (tk.Entry, ttk.Entry)):
                 entry.configure(state=global_state)
+        for entry in self.range_entries.values():
+            entry.configure(state=global_state)
+        for row in self.extract_field_rows:
+            for entry in row["widgets"].values():
+                entry.configure(state=global_state)
+            row["delete_btn"].configure(state=global_state)
 
         self.btn_window_picker.configure(state=global_state)
         self.btn_log_picker.configure(state=global_state)
         self.btn_reload.configure(state=global_state)
         self.btn_add_slot.configure(state=global_state)
+        self.btn_add_extract_field.configure(state=global_state)
 
         for slot in self.slot_entries.values():
             # Slot-level enable checkbox and delete button stay usable
@@ -641,25 +648,58 @@ class SetupApp(tk.Tk):
             font=("Segoe UI", 8), foreground="#555555",
         ).pack(fill="x", pady=(2, 8))
 
-        # --- EXTRACT CRITERIA ---
+        # --- DATA RANGE AND FIELD EXTRACTION ---
         ttk.Label(
             container,
             text=(
-                "A single board's test data is the block of lines between a row matching the Start "
-                "marker and a row matching the End marker (the End row is usually the one holding the "
-                "final test result). A log file can contain several such blocks, one per board."
+                "The range markers define one data context per barcode. Each field below is then "
+                "extracted from that context. A field can optionally select a row, start after a "
+                "reference word, and stop at a numeric or string position."
             ),
             wraplength=600, justify="left", font=("Segoe UI", 8), foreground="#555555",
         ).pack(fill="x", pady=(0, 6))
 
-        groups_frame = ttk.Frame(container)
-        groups_frame.pack(fill="x", pady=(0, 8))
+        self.range_entries = {}
+        range_group = ttk.LabelFrame(container, text="1. Data Range Criteria")
+        range_group.pack(fill="x", pady=(0, 8))
+        range_table = tk.Frame(range_group, bg=self.GRID_LINE)
+        range_table.pack(fill="x", padx=4, pady=4)
 
-        start_group = self._build_extract_group(groups_frame, "Start Extract Criteria", "EXTRACT_START")
-        start_group.pack(side="left", fill="both", expand=True, padx=(0, 4))
+        for row, label, key in (
+            (0, "Range Start Marker", "start_marker"),
+            (1, "Range End Marker", "end_marker"),
+        ):
+            tk.Label(
+                range_table, text=label, font=self.HEADER_FONT, bg=self.HEADER_BG, anchor="w",
+            ).grid(row=row, column=0, padx=(0, 1), pady=(0, 1), ipady=4, ipadx=6, sticky="nsew")
+            entry = tk.Entry(range_table)
+            entry.grid(row=row, column=1, padx=(0, 1), pady=(0, 1), ipady=3, sticky="ew")
+            self.range_entries[key] = entry
+        range_table.grid_columnconfigure(1, weight=1)
 
-        end_group = self._build_extract_group(groups_frame, "End Extract Criteria", "EXTRACT_END")
-        end_group.pack(side="left", fill="both", expand=True, padx=(4, 0))
+        fields_group = ttk.LabelFrame(container, text="2. Data Fields to Extract")
+        fields_group.pack(fill="x", pady=(0, 8))
+        self.extract_fields_table = tk.Frame(fields_group, bg=self.GRID_LINE)
+        self.extract_fields_table.pack(fill="x", padx=4, pady=(4, 2))
+        self.EXTRACT_FIELD_HEADERS = [
+            "Field Name", "String Marker (Optional)", "Start String (optional)",
+            "Start", "Size", "End String (Optional)", "",
+        ]
+        for column, title in enumerate(self.EXTRACT_FIELD_HEADERS):
+            tk.Label(
+                self.extract_fields_table, text=title, font=self.HEADER_FONT,
+                bg=self.HEADER_BG, anchor="center",
+            ).grid(row=0, column=column, padx=(0, 1), pady=(0, 1), ipady=3, sticky="nsew")
+        for column, weight in enumerate((1, 2, 2, 0, 0, 2, 0)):
+            self.extract_fields_table.grid_columnconfigure(column, weight=weight)
+        self.extract_field_rows = []
+
+        fields_footer = ttk.Frame(fields_group)
+        fields_footer.pack(fill="x", padx=4, pady=(0, 4))
+        self.btn_add_extract_field = ttk.Button(
+            fields_footer, text="+ Add Field", command=self._on_add_extract_field,
+        )
+        self.btn_add_extract_field.pack(side="left")
 
         # --- TRY OUT ---
         tryout_footer = ttk.Frame(container)
@@ -689,40 +729,46 @@ class SetupApp(tk.Tk):
         self.extract_tree.pack(side="left", fill="both", expand=True)
         tree_vscroll.pack(side="right", fill="y")
 
-    def _build_extract_group(self, parent, title, key_prefix):
-        group = ttk.LabelFrame(parent, text=title)
+    def _on_add_extract_field(self, data=None):
+        row_index = len(self.extract_field_rows) + 1
+        table = self.extract_fields_table
+        keys = ("name", "row_marker", "from_word", "pos_from", "pos_to", "end_word")
+        widgets = {}
+        for column, key in enumerate(keys):
+            entry = tk.Entry(
+                table, width=8 if key in ("pos_from", "pos_to") else 16,
+                validate="key" if key in ("pos_from", "pos_to") else None,
+                validatecommand=self._int_vcmd if key in ("pos_from", "pos_to") else None,
+                font=self.CELL_FONT, bg=self.ROW_BG, relief="flat", bd=0, highlightthickness=0,
+            )
+            entry.grid(row=row_index, column=column, padx=(0, 1), pady=(0, 1), ipady=3, sticky="ew")
+            widgets[key] = entry
 
-        table = tk.Frame(group, bg=self.GRID_LINE)
-        table.pack(fill="both", expand=True, padx=4, pady=4)
+        delete_btn = tk.Button(
+            table, text="X", bg=self.DANGER_BG, fg="white", relief="flat", bd=0, highlightthickness=0,
+            command=lambda: self._delete_extract_field(row),
+        )
+        delete_btn.grid(row=row_index, column=6, padx=(0, 1), pady=(0, 1), sticky="nsew")
+        row = {"widgets": widgets, "delete_btn": delete_btn}
+        self.extract_field_rows.append(row)
+        if data:
+            for key, entry in widgets.items():
+                value = data.get("pos_from" if key == "pos_from" else "pos_to", 0) if key in ("pos_from", "pos_to") else data.get(key, "")
+                if value not in (None, ""):
+                    entry.insert(0, str(value))
+        self._apply_states()
+        return row
 
-        def _row(r, label_text, entry_key, width=18, is_int=False, default=""):
-            tk.Label(
-                table, text=label_text, font=self.HEADER_FONT, bg=self.HEADER_BG, anchor="w",
-            ).grid(row=r, column=0, padx=(0, 1), pady=(0, 1), ipady=4, ipadx=6, sticky="nsew")
-
-            cell = tk.Frame(table, bg=self.ROW_BG)
-            cell.grid(row=r, column=1, padx=(0, 1), pady=(0, 1), sticky="nsew")
-
-            if is_int:
-                entry = tk.Entry(cell, width=width, validate="key", validatecommand=self._int_vcmd)
-            else:
-                entry = tk.Entry(cell, width=width)
-            if default:
-                entry.insert(0, default)
-            entry.pack(side="left", padx=4, pady=3, fill="x", expand=True)
-            self.settings_entries[entry_key] = entry
-
-        default_name = "extract1" if key_prefix == "EXTRACT_START" else "extract2"
-        _row(0, "Field Name", f"{key_prefix}_NAME", default=default_name)
-        _row(1, "Row Marker", f"{key_prefix}_ROW_MARKER")
-        _row(2, "From Word", f"{key_prefix}_FROM_WORD")
-        _row(3, "Start Position", f"{key_prefix}_POS_FROM", width=8, is_int=True)
-        _row(4, "End Position (0 = rest of line)", f"{key_prefix}_POS_TO", width=8, is_int=True)
-
-        table.grid_columnconfigure(0, weight=0)
-        table.grid_columnconfigure(1, weight=1)
-
-        return group
+    def _delete_extract_field(self, row):
+        row["delete_btn"].destroy()
+        for entry in row["widgets"].values():
+            entry.destroy()
+        self.extract_field_rows.remove(row)
+        for row_index, current in enumerate(self.extract_field_rows, start=1):
+            for entry in current["widgets"].values():
+                entry.grid_configure(row=row_index)
+            current["delete_btn"].grid_configure(row=row_index)
+        self._apply_states()
 
     def _pick_log_file(self):
         current = self.settings_entries["LOG_FILE_PATH"].get().strip()
@@ -742,36 +788,71 @@ class SetupApp(tk.Tk):
 
     # --- LOG EXTRACTION ---
     def _require_extract_names(self):
-        start_name = self.settings_entries["EXTRACT_START_NAME"].get().strip()
-        end_name = self.settings_entries["EXTRACT_END_NAME"].get().strip()
+        start_marker = self.range_entries["start_marker"].get().strip()
+        end_marker = self.range_entries["end_marker"].get().strip()
+        fields = self._collect_extract_fields()
 
-        if not start_name or not end_name:
+        if not start_marker or not end_marker:
             messagebox.showerror(
-                "Missing Field Name",
-                "Both 'Start Extract Criteria' and 'End Extract Criteria' groups require a Field "
-                "Name before you can try out the extraction or save the configuration.",
+                "Missing Range Criteria",
+                "Define both the Range Start Marker and Range End Marker first.",
             )
+            return False
+        if not fields:
+            messagebox.showerror("Missing Data Field", "Add at least one data field to extract.")
             return False
         return True
 
-    def _extract_value(self, line, from_word, pos_from, pos_to):
+    def _collect_extract_fields(self):
+        fields = []
+        for row in self.extract_field_rows:
+            widgets = row["widgets"]
+            name = widgets["name"].get().strip()
+            if not name:
+                continue
+            fields.append({
+                "name": name,
+                "row_marker": widgets["row_marker"].get().strip(),
+                "from_word": widgets["from_word"].get().strip(),
+                "pos_from": self._safe_int(widgets["pos_from"].get()),
+                "pos_to": self._safe_int(widgets["pos_to"].get()),
+                "end_word": widgets["end_word"].get().strip(),
+            })
+        return fields
+
+    def _extract_value(self, line, from_word, pos_from, pos_to, end_word=""):
         if from_word:
             idx = line.find(from_word)
             if idx == -1:
                 return ""
-            start = idx + len(from_word)
+            start = idx + len(from_word) + max(pos_from, 0)
         else:
             start = max(pos_from, 0)
 
         if start > len(line):
             return ""
 
+        end = len(line)
+        if end_word:
+            end_idx = line.find(end_word, start)
+            if end_idx != -1:
+                end = end_idx
         if pos_to and pos_to > 0:
-            if pos_to <= start:
-                return ""
-            return line[start:pos_to]
+            end = min(end, start + pos_to)
+        if end <= start:
+            return ""
 
-        return line[start:]
+        return line[start:end]
+
+    def _extract_field_from_range(self, lines, field):
+        row_marker = field.get("row_marker", "")
+        source = next((line for line in lines if row_marker in line), "") if row_marker else "\n".join(lines)
+        if row_marker and not source:
+            return ""
+        return self._extract_value(
+            source, field.get("from_word", ""), field.get("pos_from", 0),
+            field.get("pos_to", 0), field.get("end_word", ""),
+        )
 
     def _run_extraction_tryout(self):
         if not self._require_extract_names():
@@ -782,21 +863,9 @@ class SetupApp(tk.Tk):
             messagebox.showerror("Error", f"Log file not found:\n{log_path}")
             return
 
-        start_name = self.settings_entries["EXTRACT_START_NAME"].get().strip()
-        start_marker = self.settings_entries["EXTRACT_START_ROW_MARKER"].get().strip()
-        start_word = self.settings_entries["EXTRACT_START_FROM_WORD"].get().strip()
-        start_pos_from = self._safe_int(self.settings_entries["EXTRACT_START_POS_FROM"].get())
-        start_pos_to = self._safe_int(self.settings_entries["EXTRACT_START_POS_TO"].get())
-
-        end_name = self.settings_entries["EXTRACT_END_NAME"].get().strip()
-        end_marker = self.settings_entries["EXTRACT_END_ROW_MARKER"].get().strip()
-        end_word = self.settings_entries["EXTRACT_END_FROM_WORD"].get().strip()
-        end_pos_from = self._safe_int(self.settings_entries["EXTRACT_END_POS_FROM"].get())
-        end_pos_to = self._safe_int(self.settings_entries["EXTRACT_END_POS_TO"].get())
-
-        if not start_marker or not end_marker:
-            messagebox.showerror("Error", "Define both the Start and End row markers first.")
-            return
+        start_marker = self.range_entries["start_marker"].get().strip()
+        end_marker = self.range_entries["end_marker"].get().strip()
+        fields = self._collect_extract_fields()
 
         try:
             with open(log_path, "r", encoding="utf-8", errors="replace") as f:
@@ -806,24 +875,23 @@ class SetupApp(tk.Tk):
             return
 
         results = []
-        pending_start_line = None
+        pending_range = None
 
         for raw_line in lines:
             line = raw_line.rstrip("\n\r")
 
             if start_marker in line:
-                # A new start row means any previously pending block never found
-                # its matching end row -- discard it instead of letting it get
-                # paired with whichever end row comes next.
-                pending_start_line = line
+                pending_range = [line]
+                if end_marker in line:
+                    results.append({field["name"]: self._extract_field_from_range(pending_range, field) for field in fields})
+                    pending_range = None
                 continue
 
-            if pending_start_line is not None and end_marker in line:
-                results.append({
-                    start_name: self._extract_value(pending_start_line, start_word, start_pos_from, start_pos_to),
-                    end_name: self._extract_value(line, end_word, end_pos_from, end_pos_to),
-                })
-                pending_start_line = None
+            if pending_range is not None:
+                pending_range.append(line)
+                if end_marker in line:
+                    results.append({field["name"]: self._extract_field_from_range(pending_range, field) for field in fields})
+                    pending_range = None
 
         self._display_json_tree(results)
 
@@ -1158,20 +1226,11 @@ class SetupApp(tk.Tk):
             "MAIN_PROCESS_FILE": self.settings_entries["MAIN_PROCESS_FILE"].get().strip() or "main.py",
             "LOG_FILE_PATH": self.settings_entries["LOG_FILE_PATH"].get().strip(),
             "LOG_EXTRACT": {
-                "start": {
-                    "name": self.settings_entries["EXTRACT_START_NAME"].get().strip() or "extract1",
-                    "row_marker": self.settings_entries["EXTRACT_START_ROW_MARKER"].get().strip(),
-                    "from_word": self.settings_entries["EXTRACT_START_FROM_WORD"].get().strip(),
-                    "pos_from": self._safe_int(self.settings_entries["EXTRACT_START_POS_FROM"].get()),
-                    "pos_to": self._safe_int(self.settings_entries["EXTRACT_START_POS_TO"].get()),
+                "range": {
+                    "start_marker": self.range_entries["start_marker"].get().strip(),
+                    "end_marker": self.range_entries["end_marker"].get().strip(),
                 },
-                "end": {
-                    "name": self.settings_entries["EXTRACT_END_NAME"].get().strip() or "extract2",
-                    "row_marker": self.settings_entries["EXTRACT_END_ROW_MARKER"].get().strip(),
-                    "from_word": self.settings_entries["EXTRACT_END_FROM_WORD"].get().strip(),
-                    "pos_from": self._safe_int(self.settings_entries["EXTRACT_END_POS_FROM"].get()),
-                    "pos_to": self._safe_int(self.settings_entries["EXTRACT_END_POS_TO"].get()),
-                },
+                "fields": self._collect_extract_fields(),
             },
             "SLOTS": {},
         }
@@ -1192,8 +1251,8 @@ class SetupApp(tk.Tk):
             "MAIN_PROCESS_FILE": "main.py",
             "LOG_FILE_PATH": "",
             "LOG_EXTRACT": {
-                "start": {"name": "extract1", "row_marker": "", "from_word": "", "pos_from": 0, "pos_to": 0},
-                "end": {"name": "extract2", "row_marker": "", "from_word": "", "pos_from": 0, "pos_to": 0},
+                "range": {"start_marker": "", "end_marker": ""},
+                "fields": [],
             },
             "SLOTS": {},
         }
@@ -1223,27 +1282,26 @@ class SetupApp(tk.Tk):
         self.settings_entries["LOG_FILE_PATH"].insert(0, str(default_data.get("LOG_FILE_PATH", "")))
 
         log_extract = default_data.get("LOG_EXTRACT", {}) or {}
-        extract_start = log_extract.get("start", {}) or {}
-        extract_end = log_extract.get("end", {}) or {}
+        range_data = log_extract.get("range", {}) or {}
+        if not range_data and (log_extract.get("start") or log_extract.get("end")):
+            old_start = log_extract.get("start", {}) or {}
+            old_end = log_extract.get("end", {}) or {}
+            range_data = {
+                "start_marker": old_start.get("row_marker", ""),
+                "end_marker": old_end.get("row_marker", ""),
+            }
+            fields_data = [old_start, old_end]
+        else:
+            fields_data = log_extract.get("fields", []) or []
 
-        for prefix, group_data, default_name in (
-            ("EXTRACT_START", extract_start, "extract1"),
-            ("EXTRACT_END", extract_end, "extract2"),
-        ):
-            self.settings_entries[f"{prefix}_NAME"].delete(0, tk.END)
-            self.settings_entries[f"{prefix}_NAME"].insert(0, str(group_data.get("name", "")).strip() or default_name)
+        for key in ("start_marker", "end_marker"):
+            self.range_entries[key].delete(0, tk.END)
+            self.range_entries[key].insert(0, str(range_data.get(key, "")))
 
-            self.settings_entries[f"{prefix}_ROW_MARKER"].delete(0, tk.END)
-            self.settings_entries[f"{prefix}_ROW_MARKER"].insert(0, str(group_data.get("row_marker", "")))
-
-            self.settings_entries[f"{prefix}_FROM_WORD"].delete(0, tk.END)
-            self.settings_entries[f"{prefix}_FROM_WORD"].insert(0, str(group_data.get("from_word", "")))
-
-            self.settings_entries[f"{prefix}_POS_FROM"].delete(0, tk.END)
-            self.settings_entries[f"{prefix}_POS_FROM"].insert(0, str(group_data.get("pos_from", 0)))
-
-            self.settings_entries[f"{prefix}_POS_TO"].delete(0, tk.END)
-            self.settings_entries[f"{prefix}_POS_TO"].insert(0, str(group_data.get("pos_to", 0)))
+        for row in list(self.extract_field_rows):
+            self._delete_extract_field(row)
+        for field_data in fields_data:
+            self._on_add_extract_field(field_data)
 
         self._rebuild_slots_grid(default_data.get("SLOTS", {}))
 
