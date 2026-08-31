@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['ui.py'],
+    ['app/app.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='ui',
+    name='app',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
