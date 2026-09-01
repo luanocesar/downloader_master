@@ -7,7 +7,6 @@ def default_config():
         "SERVER_HOST_IP": "127.0.0.1",
         "SERVER_PORT": 8000,
         "TARGET_WINDOW_TITLE": "Untitled - Notepad",
-        "MAIN_PROCESS_FILE": "main.py",
         "LOG_FILE_PATH": "",
         "LOG_EXTRACT": {
             "range": {"start_marker": "", "end_marker": ""},

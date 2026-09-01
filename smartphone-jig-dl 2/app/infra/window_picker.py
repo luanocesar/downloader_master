@@ -1,4 +1,5 @@
 import ctypes
+import re
 import tkinter as tk
 from ctypes import wintypes
 
@@ -9,6 +10,20 @@ VK_ESCAPE = 0x1B
 
 # Chrome de janelas do próprio Windows que nunca é um alvo de automação válido.
 OS_CHROME_TITLES = ["Program Manager", "Taskbar", "Windows Shell Experience Host"]
+
+
+def find_window(title):
+    """Retorna o WindowSpecification (backend uia) para `title`, tolerante a
+    espaço em branco (incluindo \\r\\n) à direita do título real da janela.
+
+    O título salvo em TARGET_WINDOW_TITLE sempre passou por .strip() em
+    _title_under_cursor (abaixo) antes de ser exibido/salvo, mas o título
+    real de algumas janelas tem sufixo de espaço em branco que o Windows
+    preserva -- casar por igualdade exata (`title=`) contra o valor salvo
+    (já sem esse sufixo) nunca dá match, mesmo com a janela aberta e visível.
+    """
+    pattern = f"^{re.escape(title)}\\s*$"
+    return Desktop(backend="uia").window(title_re=pattern)
 
 
 def pick_window_title(tk_widget, own_window_title, on_hover, on_confirmed, on_cancelled):
@@ -76,7 +91,7 @@ def capture_click_coordinates(tk_root, target_window_title, on_captured, on_erro
     (ESC cancela sem chamar `on_captured`). `on_error(title, message)` é
     chamado se a janela alvo não puder ser localizada/conectada."""
     try:
-        janela = Desktop(backend="uia").window(title=target_window_title)
+        janela = find_window(target_window_title)
 
         if not janela.exists():
             on_error("Erro", f"Janela '{target_window_title}' não foi encontrada.\nAbra o aplicativo alvo antes de capturar.")

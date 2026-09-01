@@ -49,26 +49,15 @@ class SettingsTab(ttk.Frame):
             )
             self.btn_window_picker.pack(side="left")
 
-        def _build_main_process(cell):
-            self.entries["MAIN_PROCESS_FILE"] = tk.Entry(cell, width=30)
-            self.entries["MAIN_PROCESS_FILE"].pack(side="left", padx=4, pady=3)
-
         _add_settings_row(0, "SERVER_HOST_IP", _build_host)
         _add_settings_row(1, "SERVER_PORT", _build_port)
         _add_settings_row(2, "TARGET_WINDOW_TITLE", _build_window)
-        _add_settings_row(3, "MAIN_PROCESS_FILE", _build_main_process)
 
         settings_table.grid_columnconfigure(0, weight=0)
         settings_table.grid_columnconfigure(1, weight=1)
 
         ttk.Label(
-            container,
-            text="MAIN_PROCESS_FILE is launched by Start/Stop (e.g. main.py while testing, main.exe once compiled).",
-            font=("Segoe UI", 8), foreground="#555555",
-        ).pack(fill="x", pady=(2, 8))
-
-        ttk.Label(
-            container, text="Process Output:", font=("Segoe UI", 9, "bold"),
+            container, text="Server Output:", font=("Segoe UI", 9, "bold"),
         ).pack(fill="x", pady=(0, 2))
 
         self.console_output = scrolledtext.ScrolledText(
@@ -83,13 +72,12 @@ class SettingsTab(ttk.Frame):
             "SERVER_HOST_IP": self.entries["SERVER_HOST_IP"].get().strip(),
             "SERVER_PORT": int(self.entries["SERVER_PORT"].get().strip()),
             "TARGET_WINDOW_TITLE": self.entries["TARGET_WINDOW_TITLE"].get().strip(),
-            "MAIN_PROCESS_FILE": self.entries["MAIN_PROCESS_FILE"].get().strip() or "main.py",
         }
 
     def apply_data(self, data):
         for key, default in (
             ("SERVER_HOST_IP", ""), ("SERVER_PORT", 8000),
-            ("TARGET_WINDOW_TITLE", ""), ("MAIN_PROCESS_FILE", "main.py"),
+            ("TARGET_WINDOW_TITLE", ""),
         ):
             entry = self.entries[key]
             entry.delete(0, tk.END)
@@ -97,9 +85,6 @@ class SettingsTab(ttk.Frame):
 
     def get_target_window_title(self):
         return self.entries["TARGET_WINDOW_TITLE"].get().strip()
-
-    def get_main_process_file(self):
-        return self.entries["MAIN_PROCESS_FILE"].get().strip() or "main.py"
 
     def set_locked(self, locked):
         state = "disabled" if locked else "normal"

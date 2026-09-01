@@ -1,12 +1,8 @@
 import json
-import logging
-import sys
 from dataclasses import dataclass
 
 VALID_ACTION_TYPES = {"none", "click", "type_text", "key_press"}
 VALID_KEYS = {"enter", "tab", "space", "backspace"}
-
-CONFIG_FILE = "config.json"
 
 
 @dataclass
@@ -68,25 +64,3 @@ def load_and_validate_config(path):
                 raise ValueError(f"'SLOTS'['{slot_key}']['actions'][{i}]['key'] inválido: '{action.get('key')}'")
 
     return ServerConfig(host=host, port=port, target_window=target_window, slots=slots)
-
-
-def load_or_exit(path):
-    """Wrapper de load_and_validate_config para uso na inicialização: registra
-    o erro e encerra o processo (sys.exit(1)) em qualquer falha fatal."""
-    try:
-        config = load_and_validate_config(path)
-        logging.info(f"-> Configurações carregadas e validadas com sucesso de {path}.")
-        return config
-    except FileNotFoundError:
-        logging.error(f"-> FATAL ERROR: Arquivo de configuração '{path}' não encontrado.")
-        logging.error("-> Crie o arquivo baseado no modelo padrão (config.template.json).")
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        logging.error(f"-> FATAL ERROR: Formato JSON inválido no '{path}': {e}")
-        sys.exit(1)
-    except KeyError as e:
-        logging.error(f"-> FATAL ERROR: Chave obrigatória ausente no {path}: {e}")
-        sys.exit(1)
-    except ValueError as e:
-        logging.error(f"-> FATAL ERROR: Erro de validação de valor no {path}: {e}")
-        sys.exit(1)

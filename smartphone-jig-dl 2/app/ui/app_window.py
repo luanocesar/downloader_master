@@ -1,8 +1,9 @@
-import os
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from infra.process_supervisor import ProcessSupervisor
+from api.server import create_app
+from core.config import load_and_validate_config
+from infra.server_supervisor import ServerSupervisor
 
 from . import config_editor
 from . import tk_helpers as ui
@@ -17,7 +18,7 @@ STATUS_OFF_BG = "#cfd8dc"
 
 
 class SetupApp(tk.Tk):
-    def __init__(self, base_dir, config_filename="config.json"):
+    def __init__(self, config_filename="config.json"):
         super().__init__()
         self.title("Downloader App - Configuration Manager")
         self.geometry("660x700")
@@ -26,7 +27,7 @@ class SetupApp(tk.Tk):
 
         self._int_vcmd = (self.register(ui.validate_integer_input), "%P")
 
-        self.supervisor = ProcessSupervisor(base_dir, ready_marker="uvicorn running on")
+        self.supervisor = ServerSupervisor(ready_marker="uvicorn running on")
         self._locked = False
         self._dirty = False
         self._last_saved_payload = None
@@ -89,24 +90,19 @@ class SetupApp(tk.Tk):
         if self.supervisor.is_running:
             return
 
-        filename = self.settings_tab.get_main_process_file()
-
         try:
-            target_path = self.supervisor.start(filename)
+            server_config = load_and_validate_config(self.config_filename)
         except FileNotFoundError as e:
-            messagebox.showerror(
-                "Error",
-                f"Main process file not found:\n{e}\n\n"
-                "Check 'Main Process File' in Server Settings.",
-            )
+            messagebox.showerror("Error", f"Config file not found:\n{e}")
             return
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to start {filename}:\n{str(e)}")
+            messagebox.showerror("Error", f"Invalid configuration in {self.config_filename}:\n{str(e)}")
             return
 
-        self.settings_tab.append_console_line(
-            f"--- Started {os.path.basename(target_path)} (PID {self.supervisor.pid}) ---"
-        )
+        app = create_app(server_config, self.config_filename)
+        self.supervisor.start(app, server_config.host, server_config.port)
+
+        self.settings_tab.append_console_line("--- Starting server ---")
         self._locked = True
         self._apply_states()
 
@@ -114,14 +110,11 @@ class SetupApp(tk.Tk):
         if not self.supervisor.is_running or self.supervisor.stopping:
             return
 
-        # Don't flip to OFF / unlock right away: on Windows, terminating a
-        # process doesn't guarantee its listening socket is released
-        # immediately. If the user hits Start again too fast, the new
-        # process can fail to bind with "only one usage of each socket
-        # address is normally permitted". Stay locked (status shows
-        # STOPPING...) until _poll_process confirms the process has
-        # actually exited.
-        self.settings_tab.append_console_line(f"--- Stopping process (PID {self.supervisor.pid}) ---")
+        # Don't flip to OFF / unlock right away: should_exit is only honored
+        # on the next iteration of uvicorn's event loop, not instantly. Stay
+        # locked (status shows STOPPING...) until _poll_process confirms the
+        # server thread has actually finished.
+        self.settings_tab.append_console_line("--- Stopping server ---")
         self.supervisor.stop()
         self._update_run_controls()
 
@@ -240,7 +233,11 @@ class SetupApp(tk.Tk):
         self._apply_states()
 
     def save_config(self, silent=False):
-        if not self.log_file_tab.validate():
+        # Silent saves (window-picker confirm, coordinate capture) persist a
+        # single already-known-valid field in the background and must never
+        # block on or pop a dialog about an unrelated, possibly-unfinished
+        # tab -- only the explicit Save button enforces full validity.
+        if not silent and not self.log_file_tab.validate():
             return
 
         try:

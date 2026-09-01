@@ -2,7 +2,8 @@ import logging
 import time
 
 import pyautogui
-from pywinauto import Desktop
+
+from infra.window_picker import find_window
 
 # Impede que o script quebre se o operador mover o mouse sem querer
 pyautogui.FAILSAFE = False
@@ -37,7 +38,7 @@ def execute_slot_actions(slot_key, slot, label_code, janela_left, janela_top):
 
 def type_labels_into_window(target_window_title, slots, labels_para_digitar):
     try:
-        janela = Desktop(backend="uia").window(title=target_window_title)
+        janela = find_window(target_window_title)
 
         if janela.is_minimized():
             logging.info("-> Janela minimizada detectada! Restaurando...")

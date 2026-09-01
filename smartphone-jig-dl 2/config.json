@@ -2,7 +2,6 @@
     "SERVER_HOST_IP": "127.0.0.1",
     "SERVER_PORT": 8000,
     "TARGET_WINDOW_TITLE": "GUI RPA Integrator - Form1.cs [Design] - Microsoft Visual Studio",
-    "MAIN_PROCESS_FILE": "main.exe",
     "LOG_FILE_PATH": "C:/Users/4376066/Downloads/GetReelInfoforWMES 1.txt",
     "LOG_EXTRACT": {
         "range": {
