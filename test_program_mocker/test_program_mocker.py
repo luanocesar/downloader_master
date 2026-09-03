@@ -26,6 +26,13 @@ class PCBSlot:
         self.entry.bind("<FocusIn>", self.clear_placeholder)
         self.entry.bind("<Return>", self.start_test)
 
+        # Start Button (below the field) -- the operator/RPA clicks this
+        # after the barcode is typed in to kick off the test sequence.
+        self.start_btn = tk.Button(
+            self.frame, text="Start", font=("Arial", 10, "bold"), command=self.start_test,
+        )
+        self.start_btn.pack(fill="x", padx=5, pady=(0, 5))
+
         # Log Area
         self.log_area = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, font=("Consolas", 9))
         self.log_area.pack(padx=5, pady=5, fill="both", expand=True)
@@ -36,13 +43,14 @@ class PCBSlot:
         if self.entry.get().startswith("Enter SN"):
             self.entry.delete(0, tk.END)
 
-    def start_test(self, event):
+    def start_test(self, event=None):
         sn = self.entry.get().strip()
         if self.is_testing or not sn or sn.startswith("Enter SN"):
             return
 
         self.is_testing = True
         self.entry.config(state="disabled")
+        self.start_btn.config(state="disabled")
         self.status_lbl.config(bg="gold", text=f"Slot {self.index+1} - TESTING")
         
         self.log_area.config(state="normal")
@@ -89,9 +97,12 @@ class PCBSlot:
             
             color = "lightgreen" if result == "PASS" else "salmon"
             self.status_lbl.config(bg=color, text=f"Slot {self.index+1} - {result}")
-            
+
+            # Deliberately left populated (not cleared) so a real-world/RPA
+            # stress test can visually confirm which SN actually landed in
+            # which slot's field.
             self.entry.config(state="normal")
-            self.entry.delete(0, tk.END)
+            self.start_btn.config(state="normal")
             self.is_testing = False
 
 class PCBTesterApp:

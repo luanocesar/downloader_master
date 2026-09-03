@@ -1,0 +1,36 @@
+{
+    "SLOTS": {
+        "1": {
+            "enabled": true,
+            "actions": []
+        },
+        "2": {
+            "enabled": true,
+            "actions": []
+        },
+        "3": {
+            "enabled": true,
+            "actions": []
+        },
+        "4": {
+            "enabled": true,
+            "actions": []
+        },
+        "5": {
+            "enabled": true,
+            "actions": []
+        },
+        "6": {
+            "enabled": true,
+            "actions": []
+        },
+        "7": {
+            "enabled": true,
+            "actions": []
+        },
+        "8": {
+            "enabled": true,
+            "actions": []
+        }
+    }
+}

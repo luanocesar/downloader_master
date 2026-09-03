@@ -1,0 +1,15 @@
+{
+    "SERVER_HOST_IP": "0.0.0.0",
+    "SERVER_PORT": 8000,
+    "TARGET_WINDOW_TITLE": "PCB Tester Mockup v2.0",
+    "USE_LOG_FILE": false,
+    "LOG_FILE_PATH": "",
+    "LOG_EXTRACT": {
+        "range": {
+            "start_marker": "",
+            "end_marker": ""
+        },
+        "fields": []
+    },
+    "SCRIPT_FILE": "C:/Users/4376066/OneDrive - Jabil/Documents/projects/Downloader_Master_PLC/smartphone-jig-dl 2/app/config_A86.json"
+}

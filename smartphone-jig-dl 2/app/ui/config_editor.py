@@ -2,31 +2,49 @@ import json
 import os
 
 
-def default_config():
+def default_app_config():
     return {
         "SERVER_HOST_IP": "127.0.0.1",
         "SERVER_PORT": 8000,
         "TARGET_WINDOW_TITLE": "Untitled - Notepad",
+        "USE_LOG_FILE": False,
         "LOG_FILE_PATH": "",
         "LOG_EXTRACT": {
             "range": {"start_marker": "", "end_marker": ""},
             "fields": [],
         },
+        "SCRIPT_FILE": "",
+    }
+
+
+def default_script_config():
+    return {
         "SLOTS": {},
     }
 
 
-def load(path):
-    """Lê `path` (se existir) por cima dos defaults e retorna o dict
+def _load_over_defaults(path, defaults):
+    """Lê `path` (se existir) por cima de `defaults` e retorna o dict
     resultante. Levanta a exceção original (json/IO) se o arquivo existir mas
     for inválido -- quem chama decide como reportar."""
-    data = default_config()
+    data = dict(defaults)
 
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             data.update(json.load(f))
 
     return data
+
+
+def load_app_config(path):
+    """config.json: apenas as configurações do servidor/app (host, porta,
+    janela-alvo, log file). Não inclui SLOTS -- isso vive no script file."""
+    return _load_over_defaults(path, default_app_config())
+
+
+def load_script_config(path):
+    """Script file (nome escolhido pelo usuário): apenas SLOTS/Actions."""
+    return _load_over_defaults(path, default_script_config())
 
 
 def normalize_log_extract(log_extract):

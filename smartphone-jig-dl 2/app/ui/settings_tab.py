@@ -10,11 +10,14 @@ class SettingsTab(ttk.Frame):
     """Aba 'Server Settings': host/porta/janela-alvo/processo principal, e o
     console de saída do processo supervisionado."""
 
-    def __init__(self, parent, request_silent_save):
+    def __init__(self, parent, request_silent_save, on_use_log_file_toggle):
         super().__init__(parent)
         self.request_silent_save = request_silent_save
+        self._on_use_log_file_toggle = on_use_log_file_toggle
         self.entries = {}
+        self.use_log_file_var = tk.BooleanVar(value=False)
         self._build()
+        self.use_log_file_var.trace_add("write", self._on_use_log_file_changed)
 
     def _build(self):
         container = ttk.Frame(self)
@@ -49,9 +52,17 @@ class SettingsTab(ttk.Frame):
             )
             self.btn_window_picker.pack(side="left")
 
+        def _build_use_log_file(cell):
+            self.chk_use_log_file = tk.Checkbutton(
+                cell, text="Use Log File Logic", variable=self.use_log_file_var,
+                bg=ui.ROW_BG, anchor="w",
+            )
+            self.chk_use_log_file.pack(side="left", padx=4, pady=3)
+
         _add_settings_row(0, "SERVER_HOST_IP", _build_host)
         _add_settings_row(1, "SERVER_PORT", _build_port)
         _add_settings_row(2, "TARGET_WINDOW_TITLE", _build_window)
+        _add_settings_row(3, "USE_LOG_FILE", _build_use_log_file)
 
         settings_table.grid_columnconfigure(0, weight=0)
         settings_table.grid_columnconfigure(1, weight=1)
@@ -72,6 +83,7 @@ class SettingsTab(ttk.Frame):
             "SERVER_HOST_IP": self.entries["SERVER_HOST_IP"].get().strip(),
             "SERVER_PORT": int(self.entries["SERVER_PORT"].get().strip()),
             "TARGET_WINDOW_TITLE": self.entries["TARGET_WINDOW_TITLE"].get().strip(),
+            "USE_LOG_FILE": self.use_log_file_var.get(),
         }
 
     def apply_data(self, data):
@@ -82,15 +94,23 @@ class SettingsTab(ttk.Frame):
             entry = self.entries[key]
             entry.delete(0, tk.END)
             entry.insert(0, str(data.get(key, default)))
+        self.use_log_file_var.set(bool(data.get("USE_LOG_FILE", False)))
 
     def get_target_window_title(self):
         return self.entries["TARGET_WINDOW_TITLE"].get().strip()
+
+    def get_use_log_file(self):
+        return self.use_log_file_var.get()
 
     def set_locked(self, locked):
         state = "disabled" if locked else "normal"
         for entry in self.entries.values():
             entry.configure(state=state)
         self.btn_window_picker.configure(state=state)
+        self.chk_use_log_file.configure(state=state)
+
+    def _on_use_log_file_changed(self, *_args):
+        self._on_use_log_file_toggle(self.use_log_file_var.get())
 
     def append_console_line(self, text):
         self.console_output.configure(state="normal")

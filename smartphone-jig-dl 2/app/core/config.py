@@ -1,7 +1,8 @@
 import json
 from dataclasses import dataclass
 
-VALID_ACTION_TYPES = {"none", "click", "type_text", "key_press"}
+VALID_ACTION_TYPES = {"none", "click", "double_click", "type_text", "key_press"}
+COORDINATE_ACTION_TYPES = {"click", "double_click"}
 VALID_KEYS = {"enter", "tab", "space", "backspace"}
 
 
@@ -13,17 +14,20 @@ class ServerConfig:
     slots: dict
 
 
-def load_and_validate_config(path):
-    """Lê e valida config.json. Levanta FileNotFoundError, json.JSONDecodeError,
-    KeyError ou ValueError em caso de problema; nunca chama sys.exit (quem
-    chama decide se é fatal ou não)."""
-    with open(path, "r", encoding="utf-8") as f:
+def load_and_validate_config(config_path, script_path):
+    """Lê e valida config.json (host/porta/janela-alvo) + o script file
+    (SLOTS). Levanta FileNotFoundError, json.JSONDecodeError, KeyError ou
+    ValueError em caso de problema; nunca chama sys.exit (quem chama decide
+    se é fatal ou não)."""
+    with open(config_path, "r", encoding="utf-8") as f:
         config_data = json.load(f)
+    with open(script_path, "r", encoding="utf-8") as f:
+        script_data = json.load(f)
 
     host = config_data["SERVER_HOST_IP"]
     port = config_data["SERVER_PORT"]
     target_window = config_data["TARGET_WINDOW_TITLE"]
-    slots = config_data["SLOTS"]
+    slots = script_data["SLOTS"]
 
     if not isinstance(host, str):
         raise ValueError("'SERVER_HOST_IP' deve ser do tipo <string>")
@@ -55,10 +59,10 @@ def load_and_validate_config(path):
             if a_type not in VALID_ACTION_TYPES:
                 raise ValueError(f"'SLOTS'['{slot_key}']['actions'][{i}]['type'] inválido: '{a_type}'")
 
-            if a_type == "click":
+            if a_type in COORDINATE_ACTION_TYPES:
                 x, y = action.get("x"), action.get("y")
                 if not isinstance(x, int) or not isinstance(y, int):
-                    raise ValueError(f"'SLOTS'['{slot_key}']['actions'][{i}] do tipo 'click' precisa de 'x' e 'y' <integer>")
+                    raise ValueError(f"'SLOTS'['{slot_key}']['actions'][{i}] do tipo '{a_type}' precisa de 'x' e 'y' <integer>")
 
             if a_type == "key_press" and action.get("key", "enter") not in VALID_KEYS:
                 raise ValueError(f"'SLOTS'['{slot_key}']['actions'][{i}]['key'] inválido: '{action.get('key')}'")

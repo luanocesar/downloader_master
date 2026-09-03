@@ -11,35 +11,68 @@ class AutoScriptTab(ttk.Frame):
     de Actions (clique/digitação/tecla) executada ao receber um código de
     barras."""
 
-    STEP_TYPES = ["None", "Click At Coordinates", "Keyboard Typing", "Press Key"]
+    STEP_TYPES = ["None", "Click At Coordinates", "Double-Click At Coordinates", "Keyboard Typing", "Press Key"]
+    COORDINATE_LABELS = ("Click At Coordinates", "Double-Click At Coordinates")
     KEY_OPTIONS = ["Enter", "Tab", "Spacebar", "Backspace"]
     KEY_VALUE_MAP = {"Enter": "enter", "Tab": "tab", "Spacebar": "space", "Backspace": "backspace"}
     KEY_LABEL_MAP = {v: k for k, v in KEY_VALUE_MAP.items()}
-    STEP_TYPE_TO_LABEL = {"none": "None", "click": "Click At Coordinates", "type_text": "Keyboard Typing", "key_press": "Press Key"}
+    STEP_TYPE_TO_LABEL = {
+        "none": "None", "click": "Click At Coordinates", "double_click": "Double-Click At Coordinates",
+        "type_text": "Keyboard Typing", "key_press": "Press Key",
+    }
 
     ACTIONS_TABLE_HEADERS = ["#", "On", "Type", "Details", ""]
     ACTIONS_TABLE_COL_WEIGHTS = [0, 0, 0, 1, 0]
 
-    def __init__(self, parent, int_vcmd, get_target_window_title, request_silent_save):
+    def __init__(
+        self, parent, int_vcmd, get_target_window_title,
+        get_active_script_name, on_open_script, on_save_as_script,
+    ):
         super().__init__(parent)
         self._int_vcmd = int_vcmd
         self.get_target_window_title = get_target_window_title
-        self.request_silent_save = request_silent_save
+        self._get_active_script_name = get_active_script_name
+        self._open_script = on_open_script
+        self._save_script_as = on_save_as_script
         self.slot_entries = {}
         self._locked = False
         self._build()
+        self.refresh_script_display()
 
     def _build(self):
         outer = ttk.Frame(self)
         outer.pack(fill="both", expand=True, padx=0, pady=6)
 
+        script_row = tk.Frame(outer, bg=ui.GRID_LINE)
+        script_row.pack(fill="x", pady=(0, 8))
+
+        tk.Label(
+            script_row, text="SCRIPT FILE", font=ui.HEADER_FONT, bg=ui.HEADER_BG,
+            anchor="w",
+        ).grid(row=0, column=0, padx=(0, 1), pady=(0, 1), ipady=4, ipadx=6, sticky="nsew")
+
+        script_cell = tk.Frame(script_row, bg=ui.ROW_BG)
+        script_cell.grid(row=0, column=1, padx=(0, 1), pady=(0, 1), sticky="nsew")
+
+        self.script_path_entry = tk.Entry(script_cell, width=24, state="readonly")
+        self.script_path_entry.pack(side="left", padx=(4, 6), pady=3, fill="x", expand=True)
+
+        self.btn_open_script = ttk.Button(script_cell, text="📂 Open Script...", command=self._on_open_script)
+        self.btn_open_script.pack(side="left", padx=(0, 4))
+
+        self.btn_save_as_script = ttk.Button(script_cell, text="💾 Save Script As...", command=self._on_save_as_script)
+        self.btn_save_as_script.pack(side="left")
+
+        script_row.grid_columnconfigure(0, weight=0)
+        script_row.grid_columnconfigure(1, weight=1)
+
         info = ttk.Label(
             outer,
             text=(
                 "Defina a automação (PyAutoGUI) executada em cada Slot ao receber um código de barras. "
-                "Cada Slot tem uma lista ordenada de Actions. Ações do tipo 'Click At Coordinates' têm "
-                "sua própria coordenada X/Y (com botão de Captura) — um Slot pode ter várias ações de "
-                "clique em sequência, cada uma em um ponto diferente."
+                "Cada Slot tem uma lista ordenada de Actions. Ações do tipo 'Click At Coordinates' e "
+                "'Double-Click At Coordinates' têm sua própria coordenada X/Y (com botão de Captura) — "
+                "um Slot pode ter várias ações de clique em sequência, cada uma em um ponto diferente."
             ),
             wraplength=600, justify="left",
         )
@@ -234,23 +267,8 @@ class AutoScriptTab(ttk.Frame):
 
         kind = action["type_var"].get()
 
-        if kind == "Click At Coordinates":
-            tk.Label(action["fields_frame"], text="X:", bg=ui.ROW_BG, font=ui.CELL_FONT).pack(side="left", padx=(4, 0))
-            ex = tk.Entry(
-                action["fields_frame"], width=5, justify="center", validate="key", validatecommand=self._int_vcmd,
-            )
-            ex.pack(side="left", padx=(2, 6), pady=2)
-            tk.Label(action["fields_frame"], text="Y:", bg=ui.ROW_BG, font=ui.CELL_FONT).pack(side="left")
-            ey = tk.Entry(
-                action["fields_frame"], width=5, justify="center", validate="key", validatecommand=self._int_vcmd,
-            )
-            ey.pack(side="left", padx=(2, 6), pady=2)
-            capture_btn = ttk.Button(
-                action["fields_frame"], text="🎯 Capture",
-                command=lambda ex=ex, ey=ey: self._start_coordinate_capture(ex, ey),
-            )
-            capture_btn.pack(side="left")
-            action["widgets"] = {"x": ex, "y": ey, "capture_btn": capture_btn}
+        if kind in self.COORDINATE_LABELS:
+            self._build_coordinate_fields(action)
 
         elif kind == "Keyboard Typing":
             source_var = tk.StringVar(value="Received Barcode")
@@ -280,6 +298,24 @@ class AutoScriptTab(ttk.Frame):
 
         # kind == "None": nenhum campo adicional
 
+    def _build_coordinate_fields(self, action):
+        tk.Label(action["fields_frame"], text="X:", bg=ui.ROW_BG, font=ui.CELL_FONT).pack(side="left", padx=(4, 0))
+        ex = tk.Entry(
+            action["fields_frame"], width=5, justify="center", validate="key", validatecommand=self._int_vcmd,
+        )
+        ex.pack(side="left", padx=(2, 6), pady=2)
+        tk.Label(action["fields_frame"], text="Y:", bg=ui.ROW_BG, font=ui.CELL_FONT).pack(side="left")
+        ey = tk.Entry(
+            action["fields_frame"], width=5, justify="center", validate="key", validatecommand=self._int_vcmd,
+        )
+        ey.pack(side="left", padx=(2, 6), pady=2)
+        capture_btn = ttk.Button(
+            action["fields_frame"], text="🎯 Capture",
+            command=lambda ex=ex, ey=ey: self._start_coordinate_capture(ex, ey),
+        )
+        capture_btn.pack(side="left")
+        action["widgets"] = {"x": ex, "y": ey, "capture_btn": capture_btn}
+
     def _start_coordinate_capture(self, ex, ey):
         target_title = self.get_target_window_title()
 
@@ -288,11 +324,15 @@ class AutoScriptTab(ttk.Frame):
             return
 
         def on_captured(x, y):
+            # Just fills the fields like a manual edit would -- the normal
+            # dirty-tracking poll picks it up and lights up Save. A silent
+            # auto-save here used to clear the dirty flag immediately, so a
+            # capture (including a re-capture correcting an earlier one)
+            # never visibly registered as a pending change.
             ex.delete(0, tk.END)
             ex.insert(0, str(x))
             ey.delete(0, tk.END)
             ey.insert(0, str(y))
-            self.request_silent_save()
 
         def on_error(title, message):
             messagebox.showerror(title, message)
@@ -304,12 +344,13 @@ class AutoScriptTab(ttk.Frame):
         w = action["widgets"]
         base = {"enabled": bool(action["enabled_var"].get())}
 
-        if kind == "Click At Coordinates":
+        if kind in self.COORDINATE_LABELS:
             x_str = w["x"].get().strip()
             y_str = w["y"].get().strip()
             x_val = int(x_str) if x_str not in ("", "-") else 0
             y_val = int(y_str) if y_str not in ("", "-") else 0
-            base.update({"type": "click", "x": x_val, "y": y_val})
+            a_type = "double_click" if kind == "Double-Click At Coordinates" else "click"
+            base.update({"type": a_type, "x": x_val, "y": y_val})
         elif kind == "Keyboard Typing":
             if w["source_var"].get() == "Custom Text":
                 base.update({"type": "type_text", "source": "custom", "text": w["text_entry"].get()})
@@ -328,7 +369,7 @@ class AutoScriptTab(ttk.Frame):
         action["enabled_var"].set(bool(data.get("enabled", True)))
         self._refresh_action_fields(action)
 
-        if kind == "click":
+        if kind in ("click", "double_click"):
             action["widgets"]["x"].insert(0, str(data.get("x", 0)))
             action["widgets"]["y"].insert(0, str(data.get("y", 0)))
         elif kind == "type_text":
@@ -359,9 +400,26 @@ class AutoScriptTab(ttk.Frame):
         self._locked = locked
         self._apply_local_states()
 
+    # --- script file field ---
+    def refresh_script_display(self):
+        self.script_path_entry.configure(state="normal")
+        self.script_path_entry.delete(0, tk.END)
+        self.script_path_entry.insert(0, self._get_active_script_name())
+        self.script_path_entry.configure(state="readonly")
+
+    def _on_open_script(self):
+        self._open_script()
+        self.refresh_script_display()
+
+    def _on_save_as_script(self):
+        self._save_script_as()
+        self.refresh_script_display()
+
     def _apply_local_states(self):
         global_state = "disabled" if self._locked else "normal"
         self.btn_add_slot.configure(state=global_state)
+        self.btn_open_script.configure(state=global_state)
+        self.btn_save_as_script.configure(state=global_state)
 
         for slot in self.slot_entries.values():
             # Slot-level enable checkbox and delete button stay usable

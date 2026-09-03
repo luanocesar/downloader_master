@@ -1,0 +1,172 @@
+{
+    "SLOTS": {
+        "1": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 110,
+                    "y": 81
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "2": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 320,
+                    "y": 80
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "3": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 524,
+                    "y": 83
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "4": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 731,
+                    "y": 82
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "5": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 110,
+                    "y": 284
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "6": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 319,
+                    "y": 283
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "7": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 525,
+                    "y": 282
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        },
+        "8": {
+            "enabled": true,
+            "actions": [
+                {
+                    "enabled": true,
+                    "type": "click",
+                    "x": 729,
+                    "y": 284
+                },
+                {
+                    "enabled": true,
+                    "type": "type_text",
+                    "source": "barcode"
+                },
+                {
+                    "enabled": true,
+                    "type": "key_press",
+                    "key": "enter"
+                }
+            ]
+        }
+    }
+}
