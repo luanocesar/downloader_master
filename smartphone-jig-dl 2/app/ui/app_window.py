@@ -269,7 +269,7 @@ class SetupApp(tk.Tk):
 
         self.settings_tab.apply_data(app_data)
         self.log_file_tab.apply_data(app_data)
-        self.auto_script_tab.apply_data(script_data.get("SLOTS", {}))
+        self.auto_script_tab.apply_data(script_data)
 
         # Baseline for dirty-tracking: whatever is on disk right now counts
         # as "saved", so Save starts disabled until the user actually changes something.

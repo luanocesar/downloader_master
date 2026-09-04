@@ -17,9 +17,16 @@ def default_app_config():
     }
 
 
+DEFAULT_STEP_DELAY_MS = 300
+
+
 def default_script_config():
     return {
         "SLOTS": {},
+        # Pausa (ms) aplicada pela automação depois de CADA step (clique,
+        # duplo clique, digitação, tecla) -- ajustável por PC/script porque a
+        # velocidade de resposta do app-alvo varia por máquina.
+        "STEP_DELAY_MS": DEFAULT_STEP_DELAY_MS,
     }
 
 

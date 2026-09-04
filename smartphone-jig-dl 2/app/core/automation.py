@@ -8,17 +8,8 @@ from infra.window_picker import find_window
 # Impede que o script quebre se o operador mover o mouse sem querer
 pyautogui.FAILSAFE = False
 
-# Tempos de acomodação após cada tipo de ação -- generosos de propósito.
-# Cliques/type_text não têm nenhuma confirmação de que o app-alvo realmente
-# processou a ação (trocou o foco, validou o campo, etc.) antes da próxima
-# ação começar; esses sleeps são a única salvaguarda que temos contra um
-# app-alvo mais lento que o esperado.
-CLICK_SETTLE_SECONDS = 0.3
-TYPE_SETTLE_SECONDS = 0.2
-KEY_SETTLE_SECONDS = 0.15
 
-
-def execute_slot_actions(slot_key, slot, label_code, janela):
+def execute_slot_actions(slot_key, slot, label_code, janela, step_delay_seconds):
     for action in slot.get("actions", []):
         if not action.get("enabled", True):
             continue
@@ -43,7 +34,7 @@ def execute_slot_actions(slot_key, slot, label_code, janela):
             else:
                 logging.info(f"-> Mapeando Slot {slot_key}: Duplo clique no alvo (X:{clique_x}, Y:{clique_y})")
                 pyautogui.doubleClick(clique_x, clique_y)
-            time.sleep(CLICK_SETTLE_SECONDS)
+            time.sleep(step_delay_seconds)
             logging.info(f"   [Slot {slot_key}] clique + acomodação: {time.monotonic() - t0:.3f}s")
 
         elif a_type == "type_text":
@@ -51,18 +42,19 @@ def execute_slot_actions(slot_key, slot, label_code, janela):
             t0 = time.monotonic()
             logging.info(f"   [DIGITANDO SLOT {slot_key}] -> '{text}'")
             pyautogui.write(text, interval=0.02)
-            time.sleep(TYPE_SETTLE_SECONDS)
+            time.sleep(step_delay_seconds)
             logging.info(f"   [Slot {slot_key}] digitação + acomodação: {time.monotonic() - t0:.3f}s")
 
         elif a_type == "key_press":
             key = action.get("key", "enter")
             pyautogui.press(key)
-            time.sleep(KEY_SETTLE_SECONDS)
+            time.sleep(step_delay_seconds)
 
         # a_type == "none": nenhuma operação
 
 
-def type_labels_into_window(target_window_title, slots, labels_para_digitar):
+def type_labels_into_window(target_window_title, slots, labels_para_digitar, step_delay_ms=300):
+    step_delay_seconds = step_delay_ms / 1000.0
     try:
         janela = find_window(target_window_title)
 
@@ -89,7 +81,7 @@ def type_labels_into_window(target_window_title, slots, labels_para_digitar):
                 continue
 
             try:
-                execute_slot_actions(slot_key, slot, label_code, janela)
+                execute_slot_actions(slot_key, slot, label_code, janela, step_delay_seconds)
             except Exception as e:
                 # Isola a falha de UM Slot para não abortar os demais do lote.
                 logging.error(f"-> ERRO ao executar ações do Slot {slot_key}: {e}. Pulando para o próximo Slot.")

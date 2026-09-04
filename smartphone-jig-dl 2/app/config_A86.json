@@ -5,9 +5,9 @@
             "actions": [
                 {
                     "enabled": true,
-                    "type": "click",
-                    "x": 110,
-                    "y": 81
+                    "type": "double_click",
+                    "x": 185,
+                    "y": 83
                 },
                 {
                     "enabled": true,
@@ -26,9 +26,9 @@
             "actions": [
                 {
                     "enabled": true,
-                    "type": "click",
-                    "x": 320,
-                    "y": 80
+                    "type": "double_click",
+                    "x": 538,
+                    "y": 82
                 },
                 {
                     "enabled": true,
@@ -47,9 +47,9 @@
             "actions": [
                 {
                     "enabled": true,
-                    "type": "click",
-                    "x": 524,
-                    "y": 83
+                    "type": "double_click",
+                    "x": 884,
+                    "y": 84
                 },
                 {
                     "enabled": true,
@@ -68,9 +68,9 @@
             "actions": [
                 {
                     "enabled": true,
-                    "type": "click",
-                    "x": 731,
-                    "y": 82
+                    "type": "double_click",
+                    "x": 1232,
+                    "y": 81
                 },
                 {
                     "enabled": true,
@@ -89,9 +89,9 @@
             "actions": [
                 {
                     "enabled": true,
-                    "type": "click",
-                    "x": 110,
-                    "y": 284
+                    "type": "double_click",
+                    "x": 182,
+                    "y": 433
                 },
                 {
                     "enabled": true,
@@ -110,9 +110,9 @@
             "actions": [
                 {
                     "enabled": true,
-                    "type": "click",
-                    "x": 319,
-                    "y": 283
+                    "type": "double_click",
+                    "x": 531,
+                    "y": 432
                 },
                 {
                     "enabled": true,
@@ -131,9 +131,9 @@
             "actions": [
                 {
                     "enabled": true,
-                    "type": "click",
-                    "x": 525,
-                    "y": 282
+                    "type": "double_click",
+                    "x": 890,
+                    "y": 434
                 },
                 {
                     "enabled": true,
@@ -152,9 +152,9 @@
             "actions": [
                 {
                     "enabled": true,
-                    "type": "click",
-                    "x": 729,
-                    "y": 284
+                    "type": "double_click",
+                    "x": 1231,
+                    "y": 432
                 },
                 {
                     "enabled": true,
@@ -168,5 +168,6 @@
                 }
             ]
         }
-    }
+    },
+    "STEP_DELAY_MS": 1
 }

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 VALID_ACTION_TYPES = {"none", "click", "double_click", "type_text", "key_press"}
 COORDINATE_ACTION_TYPES = {"click", "double_click"}
 VALID_KEYS = {"enter", "tab", "space", "backspace"}
+DEFAULT_STEP_DELAY_MS = 300
 
 
 @dataclass
@@ -12,6 +13,7 @@ class ServerConfig:
     port: int
     target_window: str
     slots: dict
+    step_delay_ms: int = DEFAULT_STEP_DELAY_MS
 
 
 def load_and_validate_config(config_path, script_path):
@@ -28,6 +30,7 @@ def load_and_validate_config(config_path, script_path):
     port = config_data["SERVER_PORT"]
     target_window = config_data["TARGET_WINDOW_TITLE"]
     slots = script_data["SLOTS"]
+    step_delay_ms = script_data.get("STEP_DELAY_MS", DEFAULT_STEP_DELAY_MS)
 
     if not isinstance(host, str):
         raise ValueError("'SERVER_HOST_IP' deve ser do tipo <string>")
@@ -37,6 +40,8 @@ def load_and_validate_config(config_path, script_path):
         raise ValueError("'TARGET_WINDOW_TITLE' deve ser do tipo <string>")
     if not isinstance(slots, dict):
         raise ValueError("'SLOTS' deve ser um objeto JSON")
+    if not isinstance(step_delay_ms, int) or isinstance(step_delay_ms, bool) or step_delay_ms < 0:
+        raise ValueError("'STEP_DELAY_MS' deve ser um <integer> não-negativo")
 
     # Checagem profunda de cada Slot (enabled, actions [...])
     for slot_key, slot in slots.items():
@@ -67,4 +72,4 @@ def load_and_validate_config(config_path, script_path):
             if a_type == "key_press" and action.get("key", "enter") not in VALID_KEYS:
                 raise ValueError(f"'SLOTS'['{slot_key}']['actions'][{i}]['key'] inválido: '{action.get('key')}'")
 
-    return ServerConfig(host=host, port=port, target_window=target_window, slots=slots)
+    return ServerConfig(host=host, port=port, target_window=target_window, slots=slots, step_delay_ms=step_delay_ms)

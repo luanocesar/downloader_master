@@ -3,6 +3,7 @@ from tkinter import messagebox, ttk
 
 from infra import window_picker
 
+from . import config_editor
 from . import tk_helpers as ui
 
 
@@ -65,6 +66,31 @@ class AutoScriptTab(ttk.Frame):
 
         script_row.grid_columnconfigure(0, weight=0)
         script_row.grid_columnconfigure(1, weight=1)
+
+        speed_row = tk.Frame(outer, bg=ui.GRID_LINE)
+        speed_row.pack(fill="x", pady=(0, 8))
+
+        tk.Label(
+            speed_row, text="SPEED/STEP", font=ui.HEADER_FONT, bg=ui.HEADER_BG,
+            anchor="w",
+        ).grid(row=0, column=0, padx=(0, 1), pady=(0, 1), ipady=4, ipadx=6, sticky="nsew")
+
+        speed_cell = tk.Frame(speed_row, bg=ui.ROW_BG)
+        speed_cell.grid(row=0, column=1, padx=(0, 1), pady=(0, 1), sticky="nsew")
+
+        # Width 6 comfortably fits the 5-digit max (99999) this field allows.
+        self.step_delay_entry = tk.Entry(
+            speed_cell, width=6, justify="center", validate="key", validatecommand=self._int_vcmd,
+        )
+        self.step_delay_entry.pack(side="left", padx=(4, 4), pady=3)
+        tk.Label(speed_cell, text="ms", bg=ui.ROW_BG, font=ui.CELL_FONT).pack(side="left")
+        tk.Label(
+            speed_cell, text="Pause after each step (click, type, key press) -- raise it if the target app is slow to react.",
+            bg=ui.ROW_BG, font=("Segoe UI", 8), fg="#555555",
+        ).pack(side="left", padx=(10, 0))
+
+        speed_row.grid_columnconfigure(0, weight=0)
+        speed_row.grid_columnconfigure(1, weight=1)
 
         info = ttk.Label(
             outer,
@@ -390,10 +416,15 @@ class AutoScriptTab(ttk.Frame):
                 "enabled": bool(slot["enabled_var"].get()),
                 "actions": [self._get_action_data(action) for action in slot["actions"]],
             }
-        return {"SLOTS": slots}
+        step_delay_ms = ui.safe_int(self.step_delay_entry.get(), config_editor.DEFAULT_STEP_DELAY_MS)
+        return {"SLOTS": slots, "STEP_DELAY_MS": step_delay_ms}
 
-    def apply_data(self, slots_dict):
-        self._rebuild_slots_grid(slots_dict)
+    def apply_data(self, script_data):
+        self._rebuild_slots_grid(script_data.get("SLOTS", {}))
+
+        self.step_delay_entry.delete(0, tk.END)
+        self.step_delay_entry.insert(0, str(script_data.get("STEP_DELAY_MS", config_editor.DEFAULT_STEP_DELAY_MS)))
+
         self._apply_local_states()
 
     def set_locked(self, locked):
@@ -420,6 +451,7 @@ class AutoScriptTab(ttk.Frame):
         self.btn_add_slot.configure(state=global_state)
         self.btn_open_script.configure(state=global_state)
         self.btn_save_as_script.configure(state=global_state)
+        self.step_delay_entry.configure(state=global_state)
 
         for slot in self.slot_entries.values():
             # Slot-level enable checkbox and delete button stay usable

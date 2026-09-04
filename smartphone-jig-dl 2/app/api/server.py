@@ -35,7 +35,9 @@ class TriggerServer:
 
     def _run_typing_routine(self, labels_para_digitar):
         try:
-            automation.type_labels_into_window(self.config.target_window, self.config.slots, labels_para_digitar)
+            automation.type_labels_into_window(
+                self.config.target_window, self.config.slots, labels_para_digitar, self.config.step_delay_ms,
+            )
         finally:
             self._lock.release()
 
@@ -68,6 +70,7 @@ class TriggerServer:
                 reloaded = load_and_validate_config(self.config_path, self.script_path)
                 self.config.slots = reloaded.slots
                 self.config.target_window = reloaded.target_window
+                self.config.step_delay_ms = reloaded.step_delay_ms
             except Exception as e:
                 logging.warning(f"-> Falha ao recarregar {self.config_path}/{self.script_path} ({e}). Usando a última configuração válida em memória.")
 
